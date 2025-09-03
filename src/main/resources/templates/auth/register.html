@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户注册 - 石大视频共享平台</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link th:href="@{/vendor/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link th:href="@{/vendor/bootstrap-icons/bootstrap-icons.css}" rel="stylesheet">
+    <!-- 自定义CSS -->
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    
+    <style>
+        .form-text {
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-8 col-lg-6">
+                    <div class="register-card p-4">
+                        <!-- 品牌标题 -->
+                        <div class="text-center mb-4">
+                            <h2 class="brand-title">
+                                <i class="bi bi-play-circle-fill"></i> 石大视频共享平台
+                            </h2>
+                            <p class="text-muted">创建您的账户</p>
+                        </div>
+                        
+                        <!-- 注册表单 -->
+                        <form th:action="@{/register}" method="post" th:object="${registerForm}">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">用户名 <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-person"></i>
+                                    </span>
+                                    <input type="text" class="form-control" 
+                                           th:field="*{username}"
+                                           th:classappend="${#fields.hasErrors('username')} ? 'is-invalid'"
+                                           id="username" placeholder="3-20位字母数字下划线">
+                                </div>
+                                <div class="form-text">用户名长度3-20位，只能包含字母、数字和下划线</div>
+                                <div th:if="${#fields.hasErrors('username')}" class="invalid-feedback">
+                                    <span th:errors="*{username}"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="password" class="form-label">密码 <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-lock"></i>
+                                    </span>
+                                    <input type="password" class="form-control" 
+                                           th:field="*{password}"
+                                           th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'"
+                                           id="password" placeholder="至少8位，包含字母和数字">
+                                </div>
+                                <div class="form-text">密码长度8-64位，必须包含字母和数字</div>
+                                <div th:if="${#fields.hasErrors('password')}" class="invalid-feedback">
+                                    <span th:errors="*{password}"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="confirmPassword" class="form-label">确认密码 <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-lock-fill"></i>
+                                    </span>
+                                    <input type="password" class="form-control" 
+                                           th:field="*{confirmPassword}"
+                                           th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid'"
+                                           id="confirmPassword" placeholder="请再次输入密码">
+                                </div>
+                                <div th:if="${#fields.hasErrors('confirmPassword')}" class="invalid-feedback">
+                                    <span th:errors="*{confirmPassword}"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="email" class="form-label">邮箱（可选）</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-envelope"></i>
+                                    </span>
+                                    <input type="email" class="form-control" 
+                                           th:field="*{email}"
+                                           th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'"
+                                           id="email" placeholder="your@example.com">
+                                </div>
+                                <div class="form-text">邮箱地址可用于找回密码（选填）</div>
+                                <div th:if="${#fields.hasErrors('email')}" class="invalid-feedback">
+                                    <span th:errors="*{email}"></span>
+                                </div>
+                            </div>
+                            
+                            <!-- 全局错误消息 -->
+                            <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger">
+                                <div th:each="error : ${#fields.globalErrors()}" th:text="${error}"></div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-gradient w-100 mb-3">
+                                <i class="bi bi-person-plus"></i> 注册账户
+                            </button>
+                        </form>
+                        
+                        <div class="text-center">
+                            <p class="mb-0">已有账户？ 
+                                <a href="/login" th:href="@{/login}" class="text-decoration-none">立即登录</a>
+                            </p>
+                            <a href="/" th:href="@{/}" class="text-muted text-decoration-none">
+                                <i class="bi bi-arrow-left"></i> 返回首页
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap 5 JS -->
+    <script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

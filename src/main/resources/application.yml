@@ -1,0 +1,98 @@
+spring:
+  application:
+    name: video-sharing-site
+  config:
+    import: optional:classpath:secrets.properties
+
+  datasource:
+    url: jdbc:mysql://10.200.21.33:3306/video_site?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&createDatabaseIfNotExist=true
+    # spring.datasource.username=REPLACE_WITH_USERNAME
+    # spring.datasource.password=REPLACE_WITH_PASSWORD
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    
+  # JPA配置
+  jpa:
+    hibernate:
+      ddl-auto: none  # 由Flyway管理表结构
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+    
+  # Flyway配置
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    
+  # Thymeleaf配置
+  thymeleaf:
+    cache: false  # 开发环境关闭缓存
+    encoding: UTF-8
+    mode: HTML5
+    prefix: classpath:/templates/
+    suffix: .html
+    
+  # 文件上传配置
+  servlet:
+    multipart:
+      max-file-size: 200MB
+      max-request-size: 200MB
+      enabled: true
+      
+  # Jackson配置
+  jackson:
+    time-zone: Asia/Shanghai
+    date-format: yyyy-MM-dd HH:mm:ss
+
+# 服务器配置
+server:
+  port: 8080
+  servlet:
+    context-path: /
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+# 应用配置
+app:
+  # 文件存储配置
+  storage:
+    base-dir: ./data
+    video-dir: videos
+    thumb-dir: thumbs
+  
+  # FFmpeg配置
+  ffmpeg:
+    path: ffmpeg
+    ffprobe-path: ffprobe
+    
+  # 缩略图配置
+  thumbnail:
+    width: 320
+    height: 180
+    time-position: 5  # 第5秒截取缩略图
+
+# 日志配置
+logging:
+  level:
+    com.videosite: INFO
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    file: '%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n'
+    console: '%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n'
+  file:
+    name: logs/application.log
+
+# 管理端点配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized

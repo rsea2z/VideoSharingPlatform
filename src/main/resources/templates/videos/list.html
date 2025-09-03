@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<div layout:fragment="content">
+    <!-- 页面标题 -->
+    <div class="page-header text-white text-center py-4 mb-5">
+        <div class="container">
+            <h1 class="display-5 fw-bold mb-3">
+                <i class="bi bi-collection-play"></i>
+                <span th:if="${query != null and !#strings.isEmpty(query)}">
+                    搜索结果
+                </span>
+                <span th:unless="${query != null and !#strings.isEmpty(query)}">
+                    视频列表
+                </span>
+            </h1>
+            <p class="lead mb-0" th:if="${query != null and !#strings.isEmpty(query)}">
+                关键词：<span class="text-warning fw-bold" th:text="${query}"></span>
+            </p>
+            <p class="lead mb-0" th:unless="${query != null and !#strings.isEmpty(query)}">
+                发现精彩视频内容
+            </p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- 搜索和过滤 -->
+        <div class="row mb-4">
+            <div class="col-md-8 mx-auto">
+                <form th:action="@{/videos}" method="get" class="d-flex search-form align-items-center justify-content-center">
+                    <input type="text" 
+                           class="form-control search-input" 
+                           name="q" 
+                           th:value="${query}"
+                           placeholder="搜索视频标题、关键词或上传者..."
+                           aria-label="搜索视频">
+                    <button class="btn search-btn ms-3" type="submit">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 搜索结果统计 -->
+        <div class="row mb-4" th:if="${videos != null}">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="search-stats">
+                        <span class="text-muted">
+                            <span th:if="${query != null and !#strings.isEmpty(query)}">
+                                找到 <strong th:text="${videos.totalElements}">0</strong> 个相关视频
+                            </span>
+                            <span th:unless="${query != null and !#strings.isEmpty(query)}">
+                                共 <strong th:text="${videos.totalElements}">0</strong> 个视频
+                            </span>
+                        </span>
+                    </div>
+                    <div class="view-options">
+                        <small class="text-muted">
+                            第 <span th:text="${videos.number + 1}">1</span> 页，
+                            共 <span th:text="${videos.totalPages}">1</span> 页
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 视频列表 -->
+        <div th:if="${videos != null and #lists.size(videos.content) > 0}">
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6" th:each="video : ${videos.content}">
+                    <a th:href="@{'/videos/' + ${video.id}}" class="video-link">
+                        <div class="card video-card h-100 border-0 shadow-sm">
+                            <div class="card-img-container position-relative">
+                                <img th:src="@{'/thumbnails/' + ${video.id}}" 
+                                     class="card-img-top thumbnail" 
+                                     th:alt="${video.title}"
+                                     style="height: 200px; object-fit: cover;"
+                                     onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22320%22%20height%3D%22200%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23dee2e6%22/%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20dominant-baseline%3D%22middle%22%20text-anchor%3D%22middle%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%2216%22%20fill%3D%22%236c757d%22%3E%E6%97%A0%E7%BC%A9%E7%95%A5%E5%9B%BE%3C/text%3E%3C/svg%3E'">
+                                <div class="video-overlay">
+                                    <div class="play-button">
+                                        <i class="bi bi-play-circle-fill"></i>
+                                    </div>
+                                </div>
+                                <div class="video-duration position-absolute bottom-0 end-0 m-2">
+                                    <span class="badge bg-dark bg-opacity-75" th:if="${video.durationSeconds != null}">
+                                        <span th:with="minutes=${video.durationSeconds / 60}, seconds=${video.durationSeconds % 60}"
+                                              th:text="${#numbers.formatInteger(minutes, 0)} + ':' + ${seconds < 10 ? '0' + #numbers.formatInteger(seconds, 0) : #numbers.formatInteger(seconds, 0)}">0:00</span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title video-title mb-2" th:text="${video.title}">视频标题</h5>
+                                <p class="card-text text-muted small mb-2" th:text="${#strings.abbreviate(video.description, 80)}">视频描述</p>
+                                <div class="video-meta d-flex justify-content-between align-items-center">
+                                    <small class="text-muted" th:if="${video.uploader != null}">
+                                        <i class="bi bi-person-circle"></i>
+                                        <span th:text="${video.uploader.username}">用户名</span>
+                                    </small>
+                                    <div class="video-stats">
+                                        <small class="text-muted me-2">
+                                            <i class="bi bi-eye"></i>
+                                            <span th:text="${video.viewsTotal ?: 0}">0</span>
+                                        </small>
+                                        <small class="text-muted">
+                                            <i class="bi bi-download"></i>
+                                            <span th:text="${video.downloadsTotal ?: 0}">0</span>
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="video-date mt-2">
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar3"></i>
+                                        <span th:text="${#temporals.format(video.createdAt, 'yyyy-MM-dd HH:mm')}">上传时间</span>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 分页导航 -->
+            <nav aria-label="视频列表分页" th:if="${videos.totalPages > 1}" class="mt-5">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${videos.first} ? 'disabled'">
+                        <a class="page-link" 
+                           th:href="@{/videos(page=${videos.number - 1}, q=${query})}" 
+                           th:unless="${videos.first}">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                        <span class="page-link" th:if="${videos.first}">
+                            <i class="bi bi-chevron-left"></i>
+                        </span>
+                    </li>
+                    
+                    <!-- 页码显示逻辑 -->
+                    <th:block th:with="startPage=${videos.number > 2 ? videos.number - 2 : 0}, 
+                                      endPage=${videos.number + 2 < videos.totalPages ? videos.number + 2 : videos.totalPages - 1}">
+                        <li class="page-item" th:if="${startPage > 0}">
+                            <a class="page-link" th:href="@{/videos(page=0, q=${query})}">1</a>
+                        </li>
+                        <li class="page-item disabled" th:if="${startPage > 1}">
+                            <span class="page-link">...</span>
+                        </li>
+                        
+                        <li class="page-item" 
+                            th:each="i : ${#numbers.sequence(startPage, endPage)}"
+                            th:classappend="${i == videos.number} ? 'active'">
+                            <a class="page-link" 
+                               th:href="@{/videos(page=${i}, q=${query})}"
+                               th:text="${i + 1}">1</a>
+                        </li>
+                        
+                        <li class="page-item disabled" th:if="${endPage < videos.totalPages - 2}">
+                            <span class="page-link">...</span>
+                        </li>
+                        <li class="page-item" th:if="${endPage < videos.totalPages - 1}">
+                            <a class="page-link" 
+                               th:href="@{/videos(page=${videos.totalPages - 1}, q=${query})}"
+                               th:text="${videos.totalPages}">最后页</a>
+                        </li>
+                    </th:block>
+                    
+                    <li class="page-item" th:classappend="${videos.last} ? 'disabled'">
+                        <a class="page-link" 
+                           th:href="@{/videos(page=${videos.number + 1}, q=${query})}" 
+                           th:unless="${videos.last}">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                        <span class="page-link" th:if="${videos.last}">
+                            <i class="bi bi-chevron-right"></i>
+                        </span>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- 无结果提示 -->
+        <div th:if="${videos == null or #lists.size(videos.content) == 0}" class="text-center py-5">
+            <div class="empty-state">
+                <i class="bi bi-search display-1 text-muted mb-3"></i>
+                <h3 class="text-muted mb-3">
+                    <span th:if="${query != null and !#strings.isEmpty(query)}">
+                        没有找到相关视频
+                    </span>
+                    <span th:unless="${query != null and !#strings.isEmpty(query)}">
+                        暂无视频
+                    </span>
+                </h3>
+                <p class="text-muted mb-4">
+                    <span th:if="${query != null and !#strings.isEmpty(query)}">
+                        尝试使用其他关键词搜索，或者
+                    </span>
+                    <span th:unless="${query != null and !#strings.isEmpty(query)}">
+                        目前还没有视频内容，
+                    </span>
+                </p>
+                <div class="empty-actions">
+                    <a th:href="@{/}" class="btn btn-outline-primary me-2">
+                        <i class="bi bi-house"></i> 返回首页
+                    </a>
+                    <a th:href="@{/upload}" class="btn btn-gradient" sec:authorize="isAuthenticated()">
+                        <i class="bi bi-cloud-upload"></i> 上传视频
+                    </a>
+                    <a th:href="@{/register}" class="btn btn-gradient" sec:authorize="!isAuthenticated()">
+                        <i class="bi bi-person-plus"></i> 立即注册
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script>
+        // 视频卡片悬停效果
+        document.addEventListener('DOMContentLoaded', function() {
+            const videoCards = document.querySelectorAll('.video-card');
+            
+            videoCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                    this.style.boxShadow = '0 10px 30px rgba(0,0,0,0.15)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = '';
+                });
+            });
+        });
+    </script>
+</th:block>
+
+<th:block layout:fragment="styles">
+    <style>
+        .page-header {
+            background: var(--primary-gradient);
+            border-radius: 0 0 30px 30px;
+            margin-bottom: 2rem;
+        }
+        
+        .video-link {
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .video-card {
+            transition: all 0.3s ease;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        
+        .card-img-container {
+            overflow: hidden;
+        }
+        
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .video-card:hover .video-overlay {
+            opacity: 1;
+        }
+        
+        .play-button {
+            font-size: 3rem;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            transform: scale(0.8);
+            transition: all 0.3s ease;
+        }
+        
+        .video-card:hover .play-button {
+            transform: scale(1);
+        }
+        
+        .video-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            line-height: 1.3;
+            color: var(--text-color);
+            transition: color 0.3s ease;
+        }
+        
+        .video-card:hover .video-title {
+            color: var(--primary-color);
+        }
+        
+        .video-meta {
+            font-size: 0.85rem;
+        }
+        
+        .search-form .search-input {
+            border-radius: 12px;
+            border: 2px solid #dee2e6;
+            padding: 0.75rem 1rem;
+            max-width: 400px;
+            height: 45px;
+            color: var(--text-color) !important;
+            background: white !important;
+        }
+        
+        .search-form .search-input:focus {
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 0 0.2rem rgba(171, 118, 99, 0.25) !important;
+            outline: none !important;
+        }
+        
+        .search-form .search-btn {
+            border-radius: 12px;
+            background: var(--primary-gradient) !important;
+            border: 2px solid var(--primary-color) !important;
+            color: white !important;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            transition: var(--transition);
+        }
+        
+        .search-form .search-btn:hover {
+            background: var(--secondary-color) !important;
+            border-color: var(--secondary-color) !important;
+            color: white !important;
+            transform: translateY(-2px);
+        }
+        
+        .search-form .search-btn:focus {
+            background: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+            color: white !important;
+            box-shadow: 0 0 0 0.2rem rgba(171, 118, 99, 0.25) !important;
+        }
+        
+        .search-stats {
+            font-size: 0.95rem;
+        }
+        
+        .empty-state {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .pagination .page-link {
+            border-radius: 50px;
+            margin: 0 0.25rem;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #dee2e6;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+        
+        .pagination .page-item.active .page-link {
+            background: var(--primary-gradient);
+            border-color: transparent;
+            color: white;
+        }
+        
+        .pagination .page-link:hover {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 768px) {
+            .page-header {
+                margin-bottom: 1rem;
+            }
+            
+            .page-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .search-form .form-control,
+            .search-form .btn {
+                border-radius: 25px;
+                margin-bottom: 0.5rem;
+            }
+            
+            .search-form .form-control {
+                border-right: 1px solid #ced4da;
+            }
+        }
+    </style>
+</th:block>
+
+</html>

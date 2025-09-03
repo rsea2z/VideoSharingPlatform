@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout}"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<div layout:fragment="content">
+    <!-- 页面标题 -->
+    <div class="page-header text-white text-center py-4 mb-5">
+        <div class="container">
+            <h1 class="display-5 fw-bold mb-3">
+                <i class="bi bi-cloud-upload"></i> 上传视频
+            </h1>
+            <p class="lead mb-0">分享您的精彩视频内容</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card video-card border-0 shadow-sm">
+                    <div class="card-header upload-card-header text-white">
+                        <h4 class="mb-0"><i class="bi bi-cloud-upload"></i> 视频上传</h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- 显示错误信息 -->
+                        <div th:if="${errorMessage}" class="alert alert-danger" role="alert">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <span th:text="${errorMessage}">错误信息</span>
+                        </div>
+
+                        <!-- 显示成功信息 -->
+                        <div th:if="${successMessage}" class="alert alert-success" role="alert">
+                            <i class="bi bi-check-circle"></i>
+                            <span th:text="${successMessage}">成功信息</span>
+                        </div>
+
+                        <form th:action="@{/upload}" method="post" enctype="multipart/form-data" th:object="${uploadForm}">
+                            <div class="mb-3">
+                                <label for="videoFile" class="form-label">选择视频文件</label>
+                                <input type="file" class="form-control" id="videoFile" th:field="*{videoFile}" 
+                                       accept="video/*" required>
+                                <div th:if="${#fields.hasErrors('videoFile')}" class="text-danger">
+                                    <span th:errors="*{videoFile}"></span>
+                                </div>
+                                <div class="form-text">
+                                    支持的格式：MP4 等。最大文件大小：200MB
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="title" class="form-label">视频标题</label>
+                                <input type="text" class="form-control" id="title" th:field="*{title}" 
+                                       placeholder="请输入视频标题" required maxlength="255">
+                                <div th:if="${#fields.hasErrors('title')}" class="text-danger">
+                                    <span th:errors="*{title}"></span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="description" class="form-label">视频描述</label>
+                                <textarea class="form-control" id="description" th:field="*{description}" 
+                                          rows="4" placeholder="请输入视频描述（可选）"></textarea>
+                                <div th:if="${#fields.hasErrors('description')}" class="text-danger">
+                                    <span th:errors="*{description}"></span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="keywords" class="form-label">关键词</label>
+                                <input type="text" class="form-control" id="keywords" th:field="*{keywords}" 
+                                       placeholder="请输入关键词，用逗号分隔（可选）">
+                                <div th:if="${#fields.hasErrors('keywords')}" class="text-danger">
+                                    <span th:errors="*{keywords}"></span>
+                                </div>
+                                <div class="form-text">
+                                    例如：旅游,风景,美食
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" id="submitBtn" class="btn btn-gradient">
+                                    <i class="bi bi-cloud-upload"></i> 开始上传
+                                </button>
+                                <a href="/" class="btn btn-outline-primary">
+                                    <i class="bi bi-arrow-left"></i> 返回首页
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 上传须知 -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-info-circle"></i> 上传须知</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="mb-0">
+                            <li>请确保上传的视频内容健康，符合法律法规</li>
+                            <li>视频文件大小不得超过200MB</li>
+                            <li>上传后系统会自动生成缩略图</li>
+                            <li>视频处理可能需要一些时间，请耐心等待</li>
+                            <li>私有视频只有您自己可以查看</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+    <script>
+        let isSubmitting = false;
+        
+        // 文件大小检查
+        document.getElementById('videoFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const maxSize = 200 * 1024 * 1024; // 200MB
+                if (file.size > maxSize) {
+                    alert('文件大小不能超过200MB');
+                    e.target.value = '';
+                    return;
+                }
+                
+                // 更新文件大小显示
+                const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+                console.log(`已选择文件: ${file.name}, 大小: ${sizeInMB}MB`);
+            }
+        });
+        
+        // 表单提交处理
+        document.querySelector('form').addEventListener('submit', function(e) {
+            if (isSubmitting) {
+                e.preventDefault();
+                alert('正在上传中，请勿重复提交');
+                return;
+            }
+            
+            const fileInput = document.getElementById('videoFile');
+            const titleInput = document.getElementById('title');
+            
+            if (!fileInput.files[0]) {
+                e.preventDefault();
+                alert('请选择要上传的视频文件');
+                return;
+            }
+            
+            if (!titleInput.value.trim()) {
+                e.preventDefault();
+                alert('请输入视频标题');
+                titleInput.focus();
+                return;
+            }
+            
+            // 设置提交状态
+            isSubmitting = true;
+            
+            // 禁用提交按钮
+            const submitBtn = document.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="bi bi-clock"></i> 上传中...';
+            
+            // 显示进度提示
+            const progressDiv = document.createElement('div');
+            progressDiv.className = 'alert alert-info mt-3';
+            progressDiv.innerHTML = `
+                <i class="bi bi-upload"></i> 
+                正在处理您的视频，这可能需要几分钟时间，请耐心等待...
+                <div class="progress mt-2">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                         role="progressbar" style="width: 100%"></div>
+                </div>
+            `;
+            
+            // 在表单后插入进度提示
+            this.parentNode.insertBefore(progressDiv, this.nextSibling);
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('uploadForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const fileInput = document.getElementById('videoFile');
+            const fileSizeHint = document.getElementById('fileSizeHint');
+            let isSubmitting = false;
+            
+            // 文件选择监听
+            fileInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    const size = file.size / 1024 / 1024; // MB
+                    fileSizeHint.textContent = `已选择文件：${file.name}，大小：${size.toFixed(2)} MB`;
+                    fileSizeHint.className = 'form-text text-success';
+                } else {
+                    fileSizeHint.textContent = '请选择视频文件（支持 MP4、AVI、MOV 格式，大小不超过 500MB）';
+                    fileSizeHint.className = 'form-text text-muted';
+                }
+            });
+            
+            // 表单提交处理
+            form.addEventListener('submit', function(e) {
+                if (isSubmitting) {
+                    e.preventDefault();
+                    return;
+                }
+                
+                const file = fileInput.files[0];
+                if (!file) {
+                    e.preventDefault();
+                    alert('请选择要上传的视频文件');
+                    return;
+                }
+                
+                // 检查文件大小
+                const maxSize = 500 * 1024 * 1024; // 500MB
+                if (file.size > maxSize) {
+                    e.preventDefault();
+                    alert('文件大小不能超过 500MB');
+                    return;
+                }
+                
+                // 检查文件类型
+                const allowedTypes = ['video/mp4', 'video/avi', 'video/quicktime'];
+                if (!allowedTypes.includes(file.type)) {
+                    e.preventDefault();
+                    alert('只支持 MP4、AVI、MOV 格式的视频文件');
+                    return;
+                }
+                
+                // 开始上传状态
+                isSubmitting = true;
+                const originalText = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> 正在上传...';
+                
+                // 添加进度提示
+                const progressDiv = document.createElement('div');
+                progressDiv.className = 'alert alert-info mt-3';
+                progressDiv.innerHTML = '<i class="bi bi-cloud-upload"></i> 正在上传视频文件，请耐心等待...';
+                form.appendChild(progressDiv);
+                
+                // 设置超时恢复（3分钟后如果还没响应就恢复按钮）
+                setTimeout(() => {
+                    if (isSubmitting) {
+                        isSubmitting = false;
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalText;
+                        progressDiv.remove();
+                    }
+                }, 180000); // 3分钟超时
+            });
+        });
+    </script>
+</th:block>
+
+<th:block layout:fragment="styles">
+    <style>
+        .page-header {
+            background: var(--primary-gradient);
+            border-radius: 0 0 30px 30px;
+        }
+        
+        .upload-card-header {
+            background: var(--primary-gradient) !important;
+        }
+        
+        .upload-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .file-input-container {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .file-input-container input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+        
+        .file-input-label {
+            border: 2px dashed #dee2e6;
+            border-radius: var(--border-radius);
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            background: #f8f9fa;
+        }
+        
+        .file-input-label:hover {
+            border-color: var(--primary-color);
+            background: rgba(171, 118, 99, 0.05);
+        }
+        
+        .drag-over {
+            border-color: var(--primary-color);
+            background: rgba(171, 118, 99, 0.1);
+        }
+    </style>
+</th:block>
+
+</html>

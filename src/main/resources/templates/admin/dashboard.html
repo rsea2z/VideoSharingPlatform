@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>管理员仪表板 - 石大视频共享平台</title>
+    <link th:href="@{/vendor/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/vendor/bootstrap-icons/bootstrap-icons.css}" rel="stylesheet">
+    <script th:src="@{/vendor/chart.js/chart.min.js}"></script>
+    <style>
+        .sidebar {
+            background: linear-gradient(135deg, #ab7663 0%, #c19085 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            border-radius: 8px;
+            margin: 5px 0;
+        }
+        
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: white;
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .stats-card {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .content-section {
+            display: none;
+        }
+        
+        .content-section.active {
+            display: block;
+        }
+        
+        .table-card {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .btn-action {
+            border-radius: 8px;
+            padding: 5px 15px;
+            font-size: 0.8em;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-play-circle-fill"></i> 石大视频共享平台 - 管理后台
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/">
+                    <i class="bi bi-house"></i> 返回首页
+                </a>
+                <a class="nav-link" href="/logout">
+                    <i class="bi bi-box-arrow-right"></i> 退出登录
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- 侧边栏 -->
+            <div class="col-md-2 p-0">
+                <div class="sidebar p-3">
+                    <h4 class="text-center mb-4">
+                        <i class="bi bi-speedometer2"></i><br>
+                        管理控制台
+                    </h4>
+                    
+                    <nav class="nav flex-column">
+                        <a class="nav-link active" href="#" data-section="overview">
+                            <i class="bi bi-graph-up"></i> 数据概览
+                        </a>
+                        <a class="nav-link" href="#" data-section="users">
+                            <i class="bi bi-people"></i> 用户管理
+                        </a>
+                        <a class="nav-link" href="#" data-section="videos">
+                            <i class="bi bi-camera-video"></i> 视频管理
+                        </a>
+                        <a class="nav-link" href="#" data-section="stats">
+                            <i class="bi bi-bar-chart"></i> 统计报表
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- 主内容区域 -->
+            <div class="col-md-10 p-4">
+                <!-- 数据概览 -->
+                <div id="overview-section" class="content-section active">
+                    <h2 class="mb-4">数据概览</h2>
+                    
+                    <!-- 统计卡片 -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card stats-card bg-primary text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h5>总用户数</h5>
+                                            <h3 th:text="${totalUsers}">0</h3>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="bi bi-people fs-1"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stats-card bg-success text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h5>总视频数</h5>
+                                            <h3 th:text="${totalVideos}">0</h3>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="bi bi-camera-video fs-1"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stats-card bg-info text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h5>总播放量</h5>
+                                            <h3 th:text="${totalViews}">0</h3>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="bi bi-eye fs-1"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stats-card bg-warning text-dark">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h5>总下载量</h5>
+                                            <h3 th:text="${totalDownloads}">0</h3>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <i class="bi bi-download fs-1"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 热门视频 -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card table-card">
+                                <div class="card-header bg-white">
+                                    <h5><i class="bi bi-fire text-danger"></i> 最热门视频</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div th:if="${#lists.isEmpty(topViewedVideos)}" class="text-muted text-center py-4">
+                                        <i class="bi bi-camera-video-off fs-1"></i><br>
+                                        暂无视频数据
+                                    </div>
+                                    <div th:each="video, iterStat : ${topViewedVideos}" class="d-flex justify-content-between align-items-center py-2">
+                                        <div>
+                                            <h6 class="mb-1" th:text="${#strings.abbreviate(video.title, 30)}">视频标题</h6>
+                                            <small class="text-muted">
+                                                <i class="bi bi-eye"></i> <span th:text="${video.viewsTotal}">0</span> 次播放
+                                            </small>
+                                        </div>
+                                        <span class="badge bg-primary rounded-pill" th:text="${iterStat.count}">1</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card table-card">
+                                <div class="card-header bg-white">
+                                    <h5><i class="bi bi-download text-success"></i> 最多下载视频</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div th:if="${#lists.isEmpty(topDownloadedVideos)}" class="text-muted text-center py-4">
+                                        <i class="bi bi-camera-video-off fs-1"></i><br>
+                                        暂无视频数据
+                                    </div>
+                                    <div th:each="video, iterStat : ${topDownloadedVideos}" class="d-flex justify-content-between align-items-center py-2">
+                                        <div>
+                                            <h6 class="mb-1" th:text="${#strings.abbreviate(video.title, 30)}">视频标题</h6>
+                                            <small class="text-muted">
+                                                <i class="bi bi-download"></i> <span th:text="${video.downloadsTotal}">0</span> 次下载
+                                            </small>
+                                        </div>
+                                        <span class="badge bg-success rounded-pill" th:text="${iterStat.count}">1</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 用户管理 -->
+                <div id="users-section" class="content-section">
+                    <h2 class="mb-4">用户管理</h2>
+                    
+                    <div class="card table-card">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                            <h5><i class="bi bi-people"></i> 用户列表</h5>
+                            <span class="badge bg-primary" th:text="${#lists.size(allUsers)} + ' 个用户'">0 个用户</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>用户名</th>
+                                            <th>邮箱</th>
+                                            <th>角色</th>
+                                            <th>状态</th>
+                                            <th>注册时间</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="user : ${allUsers}" th:if="${allUsers != null}">
+                                            <td th:text="${user.id}">1</td>
+                                            <td>
+                                                <span th:text="${user.username}">用户名</span>
+                                                <span th:if="${user.role != null and user.role.name() == 'ADMIN'}" 
+                                                      class="badge bg-warning ms-1">管理员</span>
+                                            </td>
+                                            <td th:text="${user.email ?: '未设置'}">邮箱</td>
+                                            <td>
+                                                <span th:if="${user.role != null and user.role.name() == 'ADMIN'}" 
+                                                      class="badge bg-danger">管理员</span>
+                                                <span th:if="${user.role != null and user.role.name() == 'USER'}" 
+                                                      class="badge bg-primary">普通用户</span>
+                                            </td>
+                                            <td>
+                                                <span th:if="${user.enabled}" class="badge bg-success">正常</span>
+                                                <span th:unless="${user.enabled}" class="badge bg-secondary">禁用</span>
+                                            </td>
+                                            <td th:text="${#temporals.format(user.createdAt, 'yyyy-MM-dd HH:mm')}">注册时间</td>
+                                            <td>
+                                                <button class="btn btn-outline-primary btn-action btn-sm" 
+                                                        th:unless="${user.role != null and user.role.name() == 'ADMIN'}"
+                                                        onclick="editUser(this)"
+                                                        th:data-user-id="${user.id}"
+                                                        th:data-user-username="${user.username}"
+                                                        th:data-user-email="${user.email ?: ''}"
+                                                        th:data-user-role="${user.role != null ? user.role.name() : 'USER'}"
+                                                        th:data-user-enabled="${user.enabled}">
+                                                    <i class="bi bi-pencil"></i> 编辑
+                                                </button>
+                                                <button class="btn btn-outline-danger btn-action btn-sm ms-1" 
+                                                        th:unless="${user.role != null and user.role.name() == 'ADMIN'}"
+                                                        onclick="confirmDeleteUser(this)" 
+                                                        th:data-user-id="${user.id}"
+                                                        th:data-user-username="${user.username}">
+                                                    <i class="bi bi-trash"></i> 删除
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 视频管理 -->
+                <div id="videos-section" class="content-section">
+                    <h2 class="mb-4">视频管理</h2>
+                    
+                    <div class="card table-card">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                            <h5><i class="bi bi-camera-video"></i> 视频列表</h5>
+                            <span class="badge bg-success" th:text="${#lists.size(allVideos)} + ' 个视频'">0 个视频</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>标题</th>
+                                            <th>上传者</th>
+                                            <th>时长</th>
+                                            <th>大小</th>
+                                            <th>播放量</th>
+                                            <th>下载量</th>
+                                            <th>上传时间</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="video : ${allVideos}" th:if="${allVideos != null}">
+                                            <td th:text="${video.id}">1</td>
+                                            <td>
+                                                <a th:href="@{'/videos/' + ${video.id}}" 
+                                                   th:text="${#strings.abbreviate(video.title, 30)}" 
+                                                   class="text-decoration-none">视频标题</a>
+                                            </td>
+                                            <td th:text="${video.uploader?.username ?: '未知'}">上传者</td>
+                                            <td th:text="${T(java.lang.String).format('%d:%02d', video.durationSeconds / 60, video.durationSeconds % 60)}">0:00</td>
+                                            <td th:text="${#numbers.formatDecimal(video.sizeBytes / 1024.0 / 1024.0, 0, 1)} + ' MB'">0 MB</td>
+                                            <td th:text="${video.viewsTotal}">0</td>
+                                            <td th:text="${video.downloadsTotal}">0</td>
+                                            <td th:text="${#temporals.format(video.createdAt, 'MM-dd HH:mm')}">上传时间</td>
+                                            <td>
+                                                <a th:href="@{'/videos/' + ${video.id}}" 
+                                                   class="btn btn-outline-info btn-action btn-sm">
+                                                    <i class="bi bi-eye"></i> 查看
+                                                </a>
+                                                <button class="btn btn-outline-danger btn-action btn-sm ms-1" 
+                                                        onclick="confirmDelete(this)" 
+                                                        th:data-video-id="${video.id}"
+                                                        th:data-video-title="${video.title}">
+                                                    <i class="bi bi-trash"></i> 删除
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 统计报表 -->
+                <div id="stats-section" class="content-section">
+                    <h2 class="mb-4">统计报表</h2>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card table-card">
+                                <div class="card-header bg-white">
+                                    <h5><i class="bi bi-graph-up-arrow"></i> 每日播放趋势</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="viewsChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card table-card">
+                                <div class="card-header bg-white">
+                                    <h5><i class="bi bi-graph-down-arrow"></i> 每日下载趋势</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="downloadsChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认模态框 -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">确认删除</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>确定要删除视频 "<span id="deleteVideoTitle"></span>" 吗？</p>
+                    <p class="text-muted">此操作不可恢复。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">确认删除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 用户编辑模态框 -->
+    <div class="modal fade" id="editUserModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">编辑用户</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editUserForm">
+                        <input type="hidden" id="editUserId" name="userId">
+                        <div class="mb-3">
+                            <label for="editUsername" class="form-label">用户名</label>
+                            <input type="text" class="form-control" id="editUsername" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editEmail" class="form-label">邮箱</label>
+                            <input type="email" class="form-control" id="editEmail" name="email">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editRole" class="form-label">角色</label>
+                            <select class="form-select" id="editRole" name="role">
+                                <option value="USER">普通用户</option>
+                                <option value="ADMIN">管理员</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="editEnabled" name="enabled">
+                                <label class="form-check-label" for="editEnabled">
+                                    账户启用
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="saveUser()">保存更改</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 用户删除确认模态框 -->
+    <div class="modal fade" id="deleteUserModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">确认删除用户</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>确定要删除用户 "<span id="deleteUserUsername"></span>" 吗？</p>
+                    <p class="text-muted">此操作不可恢复，该用户的所有数据将被删除。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteUserBtn">确认删除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+    <script>
+        // 页面切换功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.sidebar .nav-link');
+            const sections = document.querySelectorAll('.content-section');
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // 移除所有活动状态
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    sections.forEach(s => s.classList.remove('active'));
+                    
+                    // 添加活动状态
+                    this.classList.add('active');
+                    const sectionId = this.dataset.section + '-section';
+                    document.getElementById(sectionId).classList.add('active');
+                    
+                    // 如果是统计页面，加载图表
+                    if (this.dataset.section === 'stats') {
+                        setTimeout(loadCharts, 100);
+                    }
+                });
+            });
+            
+            // 初始加载概览页面的图表
+            if (document.getElementById('overview-section').classList.contains('active')) {
+                setTimeout(loadCharts, 100);
+            }
+        });
+
+        // 删除视频功能
+        function confirmDelete(button) {
+            const videoId = button.dataset.videoId;
+            const videoTitle = button.dataset.videoTitle;
+            
+            document.getElementById('deleteVideoTitle').textContent = videoTitle;
+            document.getElementById('confirmDeleteBtn').onclick = function() {
+                deleteVideo(videoId);
+            };
+            
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+
+        function deleteVideo(videoId) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/videos/${videoId}/delete`;
+            
+            document.body.appendChild(form);
+            form.submit();
+            
+            // 关闭模态框
+            const modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
+            if (modal) {
+                modal.hide();
+            }
+        }
+
+        // 用户管理功能
+        function editUser(button) {
+            const userId = button.dataset.userId;
+            const username = button.dataset.userUsername;
+            const email = button.dataset.userEmail || '';
+            const role = button.dataset.userRole || 'USER';
+            const enabled = button.dataset.userEnabled === 'true';
+            
+            // 填充表单数据
+            document.getElementById('editUserId').value = userId;
+            document.getElementById('editUsername').value = username;
+            document.getElementById('editEmail').value = email;
+            document.getElementById('editRole').value = role;
+            document.getElementById('editEnabled').checked = enabled;
+            
+            // 显示模态框
+            new bootstrap.Modal(document.getElementById('editUserModal')).show();
+        }
+
+        function saveUser() {
+            const userId = document.getElementById('editUserId').value;
+            const username = document.getElementById('editUsername').value;
+            const email = document.getElementById('editEmail').value;
+            const role = document.getElementById('editRole').value;
+            const enabled = document.getElementById('editEnabled').checked;
+            
+            // 创建表单数据
+            const formData = new FormData();
+            formData.append('username', username);
+            formData.append('email', email);
+            formData.append('role', role);
+            formData.append('enabled', enabled);
+            
+            // 发送请求
+            fetch(`/admin/api/users/${userId}`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('用户信息更新成功！');
+                    location.reload(); // 刷新页面
+                } else {
+                    alert('更新失败: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('更新用户信息失败:', error);
+                alert('更新失败，请重试');
+            });
+            
+            // 关闭模态框
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editUserModal'));
+            if (modal) {
+                modal.hide();
+            }
+        }
+
+        function confirmDeleteUser(button) {
+            const userId = button.dataset.userId;
+            const username = button.dataset.userUsername;
+            
+            document.getElementById('deleteUserUsername').textContent = username;
+            document.getElementById('confirmDeleteUserBtn').onclick = function() {
+                deleteUser(userId);
+            };
+            
+            new bootstrap.Modal(document.getElementById('deleteUserModal')).show();
+        }
+
+        function deleteUser(userId) {
+            fetch(`/admin/api/users/${userId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('用户删除成功！');
+                    location.reload(); // 刷新页面
+                } else {
+                    alert('删除失败: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('删除用户失败:', error);
+                alert('删除失败，请重试');
+            });
+            
+            // 关闭模态框
+            const modal = bootstrap.Modal.getInstance(document.getElementById('deleteUserModal'));
+            if (modal) {
+                modal.hide();
+            }
+        }
+
+        // 加载图表 - 性能优化版本
+        function loadCharts() {
+            // 防抖处理，避免频繁调用
+            if (window.chartsLoaded) return;
+            window.chartsLoaded = true;
+            
+            // 使用setTimeout延迟加载，避免阻塞UI
+            setTimeout(() => {
+                loadViewsChart();
+                loadDownloadsChart();
+            }, 100);
+        }
+
+        function loadViewsChart() {
+            fetch('/admin/api/stats/daily-views')
+                .then(response => response.json())
+                .then(data => {
+                    const ctx = document.getElementById('viewsChart')?.getContext('2d');
+                    if (!ctx) return;
+                    
+                    const labels = Object.keys(data.dailyStats).sort();
+                    const values = labels.map(date => data.dailyStats[date]);
+                    
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: '每日播放量',
+                                data: values,
+                                borderColor: 'rgb(75, 192, 192)',
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                tension: 0.1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            animation: {
+                                duration: 0 // 禁用动画提升性能
+                            },
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: '最近7天播放趋势'
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => console.error('加载播放量数据失败:', error));
+        }
+
+        function loadDownloadsChart() {
+            fetch('/admin/api/stats/daily-downloads')
+                .then(response => response.json())
+                .then(data => {
+                    const ctx = document.getElementById('downloadsChart')?.getContext('2d');
+                    if (!ctx) return;
+                    
+                    const labels = Object.keys(data.dailyStats).sort();
+                    const values = labels.map(date => data.dailyStats[date]);
+                    
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: '每日下载量',
+                                data: values,
+                                borderColor: 'rgb(255, 99, 132)',
+                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                tension: 0.1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            animation: {
+                                duration: 0 // 禁用动画提升性能
+                            },
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: '最近7天下载趋势'
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => console.error('加载下载量数据失败:', error));
+        }
+    </script>
+</body>
+</html>
