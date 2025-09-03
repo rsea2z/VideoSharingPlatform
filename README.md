@@ -50,7 +50,7 @@
 
 1. **克隆仓库**
    ```bash
-   git clone https://github.com/rsea2z/video-sharing-platform.git
+   git clone https://github.com/rsea2z/VideoSharingPlatform.git
    cd video-sharing-platform
    ```
 
