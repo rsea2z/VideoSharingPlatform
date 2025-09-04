@@ -7,6 +7,10 @@
 
 一个基于 Spring Boot 的现代化视频共享平台，支持视频上传、播放、下载和管理功能。
 
+**仅作为软件设计课程的大作业，不适用于生产环境。**
+
+由于懒得安装 IDEA ，本项目在 VS Code 中开发~
+
 ## 特性
 
 - **视频管理**: 支持MP4格式视频上传、播放、下载
@@ -50,7 +54,7 @@
 
 1. **克隆仓库**
    ```bash
-   git clone https://github.com/rsea2z/video-sharing-platform.git
+   git clone https://github.com/rsea2z/VideoSharingPlatform.git
    cd video-sharing-platform
    ```
 
