@@ -6,7 +6,6 @@
     <title>管理员仪表板 - 石大视频共享平台</title>
     <link th:href="@{/vendor/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
     <link th:href="@{/vendor/bootstrap-icons/bootstrap-icons.css}" rel="stylesheet">
-    <script th:src="@{/vendor/chart.js/chart.min.js}"></script>
     <style>
         .sidebar {
             background: linear-gradient(135deg, #ab7663 0%, #c19085 100%);
@@ -474,8 +473,13 @@
         </div>
     </div>
 
+    <script th:src="@{/vendor/chart.js/chart.umd.js}"></script>
     <script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
     <script>
+        // 全局变量存储图表实例
+        let viewsChartInstance = null;
+        let downloadsChartInstance = null;
+        
         // 页面切换功能
         document.addEventListener('DOMContentLoaded', function() {
             const navLinks = document.querySelectorAll('.sidebar .nav-link');
@@ -496,14 +500,25 @@
                     
                     // 如果是统计页面，加载图表
                     if (this.dataset.section === 'stats') {
-                        setTimeout(loadCharts, 100);
+                        // 重置图表加载状态，允许重新加载
+                        window.chartsLoaded = false;
+                        setTimeout(loadCharts, 200);
                     }
                 });
             });
             
-            // 初始加载概览页面的图表
+            // 初始加载概览页面 - 等待一段时间确保 Chart.js 加载完成
             if (document.getElementById('overview-section').classList.contains('active')) {
-                setTimeout(loadCharts, 100);
+                // 等待 Chart.js 加载完成
+                function waitForChart() {
+                    if (typeof Chart !== 'undefined') {
+                        setTimeout(loadCharts, 100);
+                    } else {
+                        // 如果 Chart.js 还没加载完成，再等 100ms
+                        setTimeout(waitForChart, 100);
+                    }
+                }
+                waitForChart();
             }
         });
 
@@ -633,6 +648,12 @@
 
         // 加载图表 - 性能优化版本
         function loadCharts() {
+            // 检查 Chart.js 是否已加载
+            if (typeof Chart === 'undefined') {
+                console.error('Chart.js 未加载');
+                return;
+            }
+            
             // 防抖处理，避免频繁调用
             if (window.chartsLoaded) return;
             window.chartsLoaded = true;
@@ -645,6 +666,18 @@
         }
 
         function loadViewsChart() {
+            // 再次检查 Chart.js 是否可用
+            if (typeof Chart === 'undefined') {
+                console.error('Chart.js 未加载，无法创建播放量图表');
+                return;
+            }
+            
+            // 销毁已存在的图表实例
+            if (viewsChartInstance) {
+                viewsChartInstance.destroy();
+                viewsChartInstance = null;
+            }
+            
             fetch('/admin/api/stats/daily-views')
                 .then(response => response.json())
                 .then(data => {
@@ -654,7 +687,7 @@
                     const labels = Object.keys(data.dailyStats).sort();
                     const values = labels.map(date => data.dailyStats[date]);
                     
-                    new Chart(ctx, {
+                    viewsChartInstance = new Chart(ctx, {
                         type: 'line',
                         data: {
                             labels: labels,
@@ -690,6 +723,18 @@
         }
 
         function loadDownloadsChart() {
+            // 再次检查 Chart.js 是否可用
+            if (typeof Chart === 'undefined') {
+                console.error('Chart.js 未加载，无法创建下载量图表');
+                return;
+            }
+            
+            // 销毁已存在的图表实例
+            if (downloadsChartInstance) {
+                downloadsChartInstance.destroy();
+                downloadsChartInstance = null;
+            }
+            
             fetch('/admin/api/stats/daily-downloads')
                 .then(response => response.json())
                 .then(data => {
@@ -699,7 +744,7 @@
                     const labels = Object.keys(data.dailyStats).sort();
                     const values = labels.map(date => data.dailyStats[date]);
                     
-                    new Chart(ctx, {
+                    downloadsChartInstance = new Chart(ctx, {
                         type: 'line',
                         data: {
                             labels: labels,
