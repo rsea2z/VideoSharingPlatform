@@ -204,10 +204,10 @@
 
 十三、配置说明（实际实现）
 - MySQL 连接（实际配置）
-  - 主机：10.200.21.33（已配置）
-  - 端口：3306
+  - 主机：IP（已配置）
+  - 端口：PORT
   - 数据库名：video_site
-  - 用户名/密码：root / ***REDACTED***（已配置）
+  - 用户名/密码：root / PASSWORD（已配置）
   - 连接参数：使用时区 serverTimezone=Asia/Shanghai，字符集 useUnicode=true&characterEncoding=utf8&useSSL=false
 - JPA
   - 方言：MySQL 8
@@ -295,8 +295,8 @@
 
 二十、部署与运行（实际环境）
 - 数据库环境
-  - MySQL 8 已部署在 10.200.21.33:3306
-  - 数据库名：video_site，用户名：root，密码：***REDACTED***
+  - MySQL 8 已部署在 IP:PORT
+  - 数据库名：video_site，用户名：root，密码：PASSWORD
   - 字符集：utf8mb4，时区：Asia/Shanghai
 - 外部依赖
   - ffmpeg 和 ffprobe 已安装并加入 PATH（用于视频处理和缩略图生成）
