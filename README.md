@@ -29,6 +29,29 @@
 
 由于懒得安装 IDEA ，本项目在 VS Code 中开发~
 
+## 主要页面图
+
+### 首页
+![首页](images/home.png)
+
+### 登录页
+![登录页](images/login.png)
+
+### 注册页
+![注册页](images/register.png)
+
+### 视频列表页
+![视频列表页](images/list.png)
+
+### 视频详情页
+![视频详情页](images/detail.png)
+
+### 上传页
+![上传页](images/upload.png)
+
+### 管理大屏
+![管理大屏](images/admin.png)
+
 ## 特性
 
 - **视频管理**: 支持MP4格式视频上传、播放、下载
