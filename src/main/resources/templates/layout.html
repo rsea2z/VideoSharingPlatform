@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${pageTitle != null ? pageTitle + ' - 石大视频共享平台' : '石大视频共享平台'}">石大视频共享平台</title>
+    <title th:text="${pageTitle != null ? pageTitle + ' - 视频共享平台' : '视频共享平台'}">视频共享平台</title>
     
     <!-- Bootstrap 5 CSS -->
     <link th:href="@{/vendor/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
@@ -20,10 +20,10 @@
 </head>
 <body>
     <!-- 导航栏 -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
         <div class="container">
             <a class="navbar-brand" href="/" th:href="@{/}">
-                <i class="bi bi-play-circle-fill"></i> 石大视频共享平台
+                <i class="bi bi-play-circle-fill"></i> 视频共享平台
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -110,9 +110,9 @@
     </main>
     
     <!-- 页脚 -->
-    <footer class="bg-light py-4 mt-5">
+    <footer class="py-4 mt-5">
         <div class="container text-center">
-            <p class="text-muted mb-0">&copy; 2025 石大视频共享平台. 保留所有权利.</p>
+            <p class="text-muted mb-0">&copy; 2025 视频共享平台. 保留所有权利.</p>
         </div>
     </footer>
     

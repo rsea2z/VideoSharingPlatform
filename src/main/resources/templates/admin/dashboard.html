@@ -3,32 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>管理员仪表板 - 石大视频共享平台</title>
+    <title>管理员仪表板 - 视频共享平台</title>
     <link th:href="@{/vendor/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
     <link th:href="@{/vendor/bootstrap-icons/bootstrap-icons.css}" rel="stylesheet">
     <style>
-        .sidebar {
-            background: linear-gradient(135deg, #ab7663 0%, #c19085 100%);
+        :root {
+            --primary-blue: #0078d4;
+            --secondary-blue: #00a2ff;
+            --primary-gradient: linear-gradient(135deg, #0078d4 0%, #00a2ff 100%);
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --glass-blur: blur(10px);
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background-attachment: fixed;
             min-height: 100vh;
-            color: white;
+        }
+
+        .sidebar {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            border-right: 1px solid var(--glass-border);
+            min-height: 100vh;
+            color: #333;
         }
         
         .sidebar .nav-link {
-            color: rgba(255,255,255,0.8);
-            border-radius: 8px;
+            color: #555;
+            border-radius: 12px;
             margin: 5px 0;
+            transition: all 0.3s ease;
         }
         
         .sidebar .nav-link:hover,
         .sidebar .nav-link.active {
             color: white;
-            background: rgba(255,255,255,0.2);
+            background: var(--primary-gradient);
+            box-shadow: 0 4px 15px rgba(0, 120, 212, 0.3);
         }
         
         .stats-card {
-            border: none;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
         }
         
         .content-section {
@@ -40,9 +66,11 @@
         }
         
         .table-card {
-            border: none;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
         }
         
         .btn-action {
@@ -56,14 +84,29 @@
             height: 400px;
             margin: 20px 0;
         }
+
+        .navbar {
+            background: var(--glass-bg) !important;
+            backdrop-filter: var(--glass-blur);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .navbar-brand {
+            color: var(--primary-blue) !important;
+            font-weight: bold;
+        }
+
+        .navbar .nav-link {
+            color: #555 !important;
+        }
     </style>
 </head>
 <body>
     <!-- 顶部导航 -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container-fluid">
             <a class="navbar-brand" href="/">
-                <i class="bi bi-play-circle-fill"></i> 石大视频共享平台 - 管理后台
+                <i class="bi bi-play-circle-fill"></i> 视频共享平台 - 管理后台
             </a>
             <div class="navbar-nav ms-auto">
                 <a class="nav-link" href="/">

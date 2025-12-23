@@ -10,7 +10,7 @@
         <div class="hero-content">
             <h1 class="display-4 fw-bold text-white mb-3">
                 <i class="bi bi-play-circle-fill"></i>
-                欢迎来到石大视频共享平台
+                欢迎来到视频共享平台
             </h1>
             <p class="lead text-white-50 mb-4">发现、分享和享受精彩视频内容</p>
             <div class="hero-buttons">
@@ -150,21 +150,25 @@
 <th:block layout:fragment="styles">
     <style>
         .hero-section {
-            background: linear-gradient(135deg, #ab7663, #c19085);
-            margin: -1.5rem -15px 0;
-            padding: 4rem 15px !important;
-            border-radius: 0 0 30px 30px;
+            background: var(--primary-gradient);
+            margin: -1.5rem -15px 3rem;
+            padding: 6rem 15px !important;
+            border-radius: 0 0 50px 50px;
+            box-shadow: 0 10px 30px rgba(0, 120, 212, 0.2);
+            position: relative;
+            overflow: hidden;
         }
         
         .video-card {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            overflow: hidden;
-            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid var(--glass-border) !important;
+            background: var(--glass-bg) !important;
+            backdrop-filter: var(--glass-blur);
         }
         
         .video-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(31, 38, 135, 0.2) !important;
         }
         
         a.video-link {
@@ -180,12 +184,17 @@
         .card-img-container {
             overflow: hidden;
             height: 200px;
+            border-radius: 12px 12px 0 0;
         }
         
         .thumbnail {
-            transition: transform 0.3s ease;
+            transition: transform 0.5s ease;
             height: 100%;
             object-fit: cover;
+        }
+        
+        .video-card:hover .thumbnail {
+            transform: scale(1.1);
         }
         
         .video-overlay {
@@ -194,12 +203,13 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 120, 212, 0.2);
+            backdrop-filter: blur(2px);
             display: flex;
             align-items: center;
             justify-content: center;
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: var(--transition);
         }
         
         .card-img-container:hover .video-overlay {

@@ -145,3 +145,4 @@ flyway.conf
 *.h2.db
 *.h2.mv.db
 *.h2.trace.db
+.github

@@ -1,4 +1,4 @@
-# 石大视频共享平台 (Video Sharing Platform)
+# 视频共享平台 (Video Sharing Platform)
 
 [![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.java.net/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.0-brightgreen.svg)](https://spring.io/projects/spring-boot)
