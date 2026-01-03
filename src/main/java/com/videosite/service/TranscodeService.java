@@ -76,6 +76,62 @@ public class TranscodeService {
     }
     
     /**
+     * 为视频添加水印（版权保护功能）
+     * @param videoPath 原视频路径
+     * @param outputPath 输出视频路径
+     * @param watermarkText 水印文本（通常为上传者用户名）
+     */
+    public void addWatermark(Path videoPath, Path outputPath, String watermarkText) 
+            throws IOException, InterruptedException {
+        
+        List<String> command = new ArrayList<>();
+        command.add(ffmpegPath);
+        command.add("-i");
+        command.add(videoPath.toString());
+        command.add("-vf");
+        // 添加半透明文字水印在右下角，使用Windows系统字体Arial
+        String watermarkFilter = String.format(
+            "drawtext=text='%s':fontfile='C\\\\:/Windows/Fonts/arial.ttf':x=W-tw-10:y=H-th-10:fontsize=20:fontcolor=white@0.6:box=1:boxcolor=black@0.3:boxborderw=3",
+            watermarkText.replace("'", "'\\\\\\''")
+        );
+        command.add(watermarkFilter);
+        command.add("-codec:a");
+        command.add("copy"); // 音频直接复制，不重新编码
+        command.add("-y"); // 覆盖输出文件
+        command.add(outputPath.toString());
+        
+        log.info("开始添加水印，命令: {}", String.join(" ", command));
+        
+        ProcessBuilder pb = new ProcessBuilder(command);
+        pb.redirectErrorStream(true);
+        Process process = pb.start();
+        
+        StringBuilder output = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                output.append(line).append("\n");
+            }
+        }
+        
+        // 水印添加可能耗时较长，设置120秒超时
+        boolean finished = process.waitFor(120, TimeUnit.SECONDS);
+        if (!finished) {
+            process.destroyForcibly();
+            log.error("添加水印超时，进程输出: {}", output.toString());
+            throw new RuntimeException("添加水印超时（120秒）");
+        }
+        
+        int exitCode = process.exitValue();
+        if (exitCode != 0) {
+            log.error("添加水印失败，退出码: {}, FFmpeg输出: {}", exitCode, output.toString());
+            throw new RuntimeException("添加水印失败");
+        }
+        
+        log.info("成功添加水印: {}", outputPath);
+    }
+    
+    /**
      * 生成缩略图
      */
     public void generateThumbnail(Path videoPath, Path thumbnailPath, int durationSeconds) 

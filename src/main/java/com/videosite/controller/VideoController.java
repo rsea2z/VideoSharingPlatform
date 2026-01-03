@@ -232,6 +232,8 @@ public class VideoController {
         
         try {
             User currentUser = principal.getUser();
+            // 设置上传者用户名，用于水印功能
+            uploadForm.setUploaderUsername(currentUser.getUsername());
             Video video = videoService.uploadVideo(uploadForm, currentUser.getId());
             
             redirectAttributes.addFlashAttribute("successMessage", "视频上传成功！");

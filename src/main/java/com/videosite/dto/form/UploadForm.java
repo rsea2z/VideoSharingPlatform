@@ -20,6 +20,12 @@ public class UploadForm {
     @NotNull(message = "请选择要上传的视频文件")
     private MultipartFile videoFile;
     
+    // 是否启用水印（版权保护功能）
+    private boolean enableWatermark = false;
+    
+    // 上传者用户名（用于水印）
+    private String uploaderUsername;
+    
     /**
      * 检查文件是否为空
      */

@@ -78,6 +78,21 @@
                                 </div>
                             </div>
 
+                            <!-- 版权保护功能（创新点） -->
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="enableWatermark" 
+                                           th:field="*{enableWatermark}">
+                                    <label class="form-check-label" for="enableWatermark">
+                                        <i class="bi bi-shield-check"></i> 启用水印保护（自动添加版权标识）
+                                    </label>
+                                </div>
+                                <div class="form-text text-warning">
+                                    <i class="bi bi-info-circle"></i> 
+                                    开启后将在视频中添加您的用户名水印，保护视频版权。注意：水印处理会增加上传时间。
+                                </div>
+                            </div>
+
                             <div class="d-grid gap-2">
                                 <button type="submit" id="submitBtn" class="btn btn-gradient">
                                     <i class="bi bi-cloud-upload"></i> 开始上传

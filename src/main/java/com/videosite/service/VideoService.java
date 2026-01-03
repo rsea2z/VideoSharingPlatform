@@ -102,6 +102,20 @@ public class VideoService {
                 throw new IllegalArgumentException("视频格式不符合要求，必须是H.264视频编码和AAC音频编码的MP4文件");
             }
             
+            // 添加水印（版权保护创新功能）
+            if (form.isEnableWatermark()) {
+                String watermarkText = "Uploaded by " + form.getUploaderUsername();
+                // 生成临时水印文件路径，格式: xxx_watermarked.mp4
+                String watermarkedStoragePath = videoStoragePath.replace(".mp4", "_watermarked.mp4");
+                Path watermarkedPath = storageService.getFullPath(watermarkedStoragePath);
+                transcodeService.addWatermark(videoPath, watermarkedPath, watermarkText);
+                
+                // 替换原视频文件
+                Files.delete(videoPath);
+                Files.move(watermarkedPath, videoPath);
+                log.info("已添加水印: {}", watermarkText);
+            }
+            
             // 生成缩略图
             transcodeService.generateThumbnail(videoPath, thumbnailPath, videoInfo.getDurationSeconds());
             

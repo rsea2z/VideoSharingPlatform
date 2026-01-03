@@ -3,6 +3,11 @@ spring:
     name: video-sharing-site
   config:
     import: optional:classpath:secrets.properties
+  
+  # 启用虚拟线程（Java 21特性）用于高并发视频流处理
+  threads:
+    virtual:
+      enabled: true
 
   datasource:
     url: jdbc:mysql://10.200.21.33:3306/video_site?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&createDatabaseIfNotExist=true

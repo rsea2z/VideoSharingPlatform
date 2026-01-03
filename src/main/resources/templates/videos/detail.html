@@ -86,6 +86,28 @@
             </div>
 
             <div class="col-md-4">
+                <!-- 交互式笔记（创新功能） -->
+                <div class="card glass-panel mb-3" sec:authorize="isAuthenticated()">
+                    <div class="card-header bg-transparent border-bottom border-white border-opacity-10">
+                        <h5 class="mb-0"><i class="bi bi-journal-text"></i> 我的视频笔记</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- 笔记输入框 -->
+                        <div class="mb-3">
+                            <textarea id="noteContent" class="form-control" rows="3" 
+                                      placeholder="在这里记录笔记...点击'记笔记'将锚定当前播放时间点"></textarea>
+                            <button id="addNoteBtn" class="btn btn-gradient btn-sm mt-2 w-100">
+                                <i class="bi bi-plus-circle"></i> 记笔记
+                            </button>
+                        </div>
+                        
+                        <!-- 笔记列表 -->
+                        <div id="notesList" class="notes-list" style="max-height: 400px; overflow-y: auto;">
+                            <div class="text-muted text-center py-3">暂无笔记</div>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- 相关视频 -->
                 <div class="card glass-panel">
                     <div class="card-header bg-transparent border-bottom border-white border-opacity-10">
@@ -167,7 +189,119 @@
         .video-meta .badge {
             background: var(--primary-color) !important;
         }
+        
+        .note-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            border-left: 3px solid var(--primary-color);
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .note-item:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateX(5px);
+        }
+        
+        .note-timestamp {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
     </style>
+</th:block>
+
+<th:block layout:fragment="scripts">
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const videoId = /*[[${video.id}]]*/ 0;
+        const videoPlayer = document.querySelector('video');
+        const addNoteBtn = document.getElementById('addNoteBtn');
+        const noteContent = document.getElementById('noteContent');
+        const notesList = document.getElementById('notesList');
+        
+        // 加载笔记
+        function loadNotes() {
+            fetch(`/api/notes/video/${videoId}/my`)
+                .then(res => res.json())
+                .then(notes => {
+                    if (notes.length === 0) {
+                        notesList.innerHTML = '<div class="text-muted text-center py-3">暂无笔记</div>';
+                        return;
+                    }
+                    
+                    notesList.innerHTML = notes.map(note => `
+                        <div class="note-item" data-timestamp="${note.timestampSeconds}">
+                            <div class="note-timestamp">
+                                <i class="bi bi-clock"></i> ${formatTime(note.timestampSeconds)}
+                            </div>
+                            <div class="note-content small mt-1">${escapeHtml(note.content)}</div>
+                        </div>
+                    `).join('');
+                    
+                    // 绑定点击事件
+                    document.querySelectorAll('.note-item').forEach(item => {
+                        item.addEventListener('click', function() {
+                            const timestamp = parseInt(this.dataset.timestamp);
+                            videoPlayer.currentTime = timestamp;
+                            videoPlayer.play();
+                        });
+                    });
+                })
+                .catch(err => console.error('加载笔记失败:', err));
+        }
+        
+        // 添加笔记
+        addNoteBtn.addEventListener('click', function() {
+            const content = noteContent.value.trim();
+            if (!content) {
+                alert('请输入笔记内容');
+                return;
+            }
+            
+            const timestamp = Math.floor(videoPlayer.currentTime);
+            
+            fetch('/api/notes', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    videoId: videoId,
+                    timestampSeconds: timestamp,
+                    content: content
+                })
+            })
+            .then(res => {
+                if (res.ok) {
+                    noteContent.value = '';
+                    loadNotes();
+                } else {
+                    alert('添加笔记失败');
+                }
+            })
+            .catch(err => console.error('添加笔记失败:', err));
+        });
+        
+        // 格式化时间
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = seconds % 60;
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        }
+        
+        // HTML转义
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // 页面加载时加载笔记
+        loadNotes();
+        /*]]>*/
+    </script>
 </th:block>
 
 </html>
